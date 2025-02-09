@@ -14,4 +14,5 @@
     },
   },
   "python.terminal.activateEnvironment": true,
+  "editor.wordWrap": "on",
 }
