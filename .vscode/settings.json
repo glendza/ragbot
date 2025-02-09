@@ -1,0 +1,17 @@
+{
+  "[jsonc]": {
+    "editor.quickSuggestions": {
+      "strings": true,
+    },
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+  },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+    },
+  },
+  "python.terminal.activateEnvironment": true,
+}
