@@ -32,6 +32,8 @@ This project aims to create an AI bot specialized in a domain of choice (e.g., e
 
 ## Project setup
 
+### Running the project
+
 Python project is bootstrapped using [`uv`](https://github.com/astral-sh/uv).
 
 Project is initialized with:
@@ -50,11 +52,16 @@ uv venv
 source .venv/bin/activate
 
 # Install the package and it's dependencies in development mode:
-uv pip install -e .[dev]
+uv pip install -e .[dev,discord]
 
 # ...or, if you don't want dev packages:
-uv pip install .
+uv pip install .[discord]
 ```
+
+Optional dependencies:
+
+- `dev` - Include development packages for linting, formatting etc., which are otherwise not needed for running the app;
+- `discord` - Include packages necessary for [`Discord`](https://discord.com/) integration
 
 To run the project:
 
@@ -81,3 +88,19 @@ uv remove package-name
 # To update a Python package:
 uv lock --upgrade-package package-name
 ```
+
+### Setting up the Discord bot
+
+1. Create a new application [here](https://discord.com/developers/applications).
+2. Navigate to your application and acquire the `APPLICATION ID`.
+3. Go to `https://discord.com/developers/applications/<APPLICATION ID>/bot`, then:
+   - Name your bot.
+   - Ensure **"Message Content Intent"** is enabled.
+   - Click **"Reset Token"**, copy the token, and store it in your `.env` file as:
+     ```
+     RAGBOT__DISCORD__TOKEN=<YOUR_BOT_TOKEN>
+     ```
+4. Add the bot to your server by visiting:
+   ```
+   https://discord.com/oauth2/authorize?client_id=<APPLICATION ID>&scope=bot&permissions=563484677372992
+   ```

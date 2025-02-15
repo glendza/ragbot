@@ -4,6 +4,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from ragbot.types.logging import LogLevel
 
 
+class DiscordConfig(BaseSettings):
+    token: str | None = None
+
+
 class RagbotConfig(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -17,3 +21,6 @@ class RagbotConfig(BaseSettings):
 
     # Logging:
     log_level: LogLevel = Field(default="INFO")
+
+    # Discord:
+    discord: DiscordConfig
