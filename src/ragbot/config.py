@@ -8,6 +8,10 @@ class DiscordConfig(BaseSettings):
     token: str | None = None
 
 
+class OpenAIConfig(BaseSettings):
+    api_key: str | None = None
+
+
 class RagbotConfig(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -24,3 +28,6 @@ class RagbotConfig(BaseSettings):
 
     # Discord:
     discord: DiscordConfig
+
+    # OpenAI:
+    openai: OpenAIConfig

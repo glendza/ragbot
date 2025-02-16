@@ -52,10 +52,10 @@ uv venv
 source .venv/bin/activate
 
 # Install the package and it's dependencies in development mode:
-uv pip install -e .[dev,discord]
+uv pip install -e .[dev,discord,openai]
 
 # ...or, if you don't want dev packages:
-uv pip install .[discord]
+uv pip install .[discord,openai]
 ```
 
 Optional dependencies:
