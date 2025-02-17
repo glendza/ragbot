@@ -1,10 +1,20 @@
+import importlib
+import typing
+
 from dependency_injector import containers, providers
 from openai import AsyncClient
 from pymilvus import AsyncMilvusClient
 
 from ragbot.config import RagbotConfig
-from ragbot.interfaces import AiChatService, ChatService, LoggerFactoryService
-from ragbot.services import LoggerFactory, OpenAIChatService, RagbotDiscordChat
+from ragbot.interfaces import AiChatService, ChatService, DomainProvider, LoggerFactoryService
+from ragbot.services import LoggerFactory, OpenAIChatService, OpenAIEmbeddingService, RagbotDiscordChat
+
+
+def init_domain(module_path: str) -> DomainProvider:
+    return typing.cast(
+        DomainProvider,
+        importlib.import_module(module_path),
+    )
 
 
 class RagbotContainer(containers.DeclarativeContainer):
@@ -28,6 +38,11 @@ class RagbotContainer(containers.DeclarativeContainer):
         log_level=config.log_level,
     )
 
+    domain: providers.Resource[DomainProvider] = providers.Resource(
+        init_domain,
+        module_path=config.domain_module_path,
+    )
+
     chat_service: providers.Singleton[ChatService] = providers.Singleton(
         RagbotDiscordChat,
         token=config.discord.token,
@@ -46,4 +61,10 @@ class RagbotContainer(containers.DeclarativeContainer):
     milvus_client: providers.Singleton[AsyncMilvusClient] = providers.Singleton(
         AsyncMilvusClient,
         uri=config.milvus.uri,
+    )
+
+    embedding_service: providers.Factory[OpenAIEmbeddingService] = providers.Factory(
+        OpenAIEmbeddingService,
+        openai_client=openai,
+        embedding_model=config.openai.embedding_model,
     )

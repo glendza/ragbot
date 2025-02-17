@@ -1,0 +1,30 @@
+[
+  {
+    "type": "work_experience",
+    "company": "Fake Corp",
+    "title": "Junior Developer",
+    "start_date": "2021-06-01",
+    "end_date": "2022-06-01",
+    "location": "Remote",
+    "description": "Worked on various internal tools to improve operational efficiency and automated processes.",
+    "tech_stack": ["JavaScript", "Node.js", "MongoDB"],
+    "achievements": [
+      "Automated repetitive tasks using Node.js scripts.",
+      "Collaborated with a small team to develop a lightweight internal tool for data processing."
+    ]
+  },
+  {
+    "type": "work_experience",
+    "company": "Tech Solutions Ltd.",
+    "title": "Software Intern",
+    "start_date": "2020-06-01",
+    "end_date": "2021-05-01",
+    "location": "Hybrid",
+    "description": "Assisted with the development of an internal CRM system to improve client management and reporting.",
+    "tech_stack": ["Python", "Django", "PostgreSQL"],
+    "achievements": [
+      "Developed several data processing scripts to streamline internal operations.",
+      "Helped with the integration of a customer reporting feature into the CRM system."
+    ]
+  }
+]

@@ -134,6 +134,11 @@ wheels = [
 ]
 
 [[package]]
+name = "cv-bot"
+version = "0.1.0"
+source = { directory = "domains/cv-bot" }
+
+[[package]]
 name = "dependency-injector"
 version = "4.45.0"
 source = { registry = "https://pypi.org/simple" }
@@ -720,6 +725,7 @@ name = "ragbot"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "cv-bot" },
     { name = "dependency-injector" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -741,6 +747,7 @@ openai = [
 
 [package.metadata]
 requires-dist = [
+    { name = "cv-bot", directory = "domains/cv-bot" },
     { name = "dependency-injector", specifier = ">=4.45.0,<5.0.0" },
     { name = "discord", marker = "extra == 'discord'", specifier = ">=2.3.2,<3.0.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.15.0,<2.0.0" },

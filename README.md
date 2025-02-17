@@ -132,3 +132,11 @@ To init the Milvus DB:
    ```sh
    ragbot-cli milvus init
    ```
+
+To load data into the Milvus DB:
+
+1. Set `RAGBOT__DOMAIN_MODULE_PATH` to point to the module where the `DomainProvider` interface is implemented;
+2. Run:
+   ```sh
+   ragbot-cli milvus import-data
+   ```

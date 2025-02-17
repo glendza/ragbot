@@ -1,3 +1,5 @@
+import typing
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -10,6 +12,9 @@ class DiscordConfig(BaseSettings):
 
 class OpenAIConfig(BaseSettings):
     api_key: str | None = None
+    embedding_model: (
+        typing.Literal["text-embedding-ada-002", "text-embedding-3-small", "text-embedding-3-large"] | None
+    ) = None
 
 
 class MilvusConfig(BaseSettings):
@@ -31,6 +36,9 @@ class RagbotConfig(BaseSettings):
 
     # Logging:
     log_level: LogLevel = Field(default="INFO")
+
+    # Domain:
+    domain_module_path: str
 
     # Discord:
     discord: DiscordConfig
