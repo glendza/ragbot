@@ -12,6 +12,12 @@ class OpenAIConfig(BaseSettings):
     api_key: str | None = None
 
 
+class MilvusConfig(BaseSettings):
+    uri: str | None = None
+    collection_name: str | None = None
+    vector_dim: int | None = None
+
+
 class RagbotConfig(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -31,3 +37,6 @@ class RagbotConfig(BaseSettings):
 
     # OpenAI:
     openai: OpenAIConfig
+
+    # Milvus:
+    milvus: MilvusConfig

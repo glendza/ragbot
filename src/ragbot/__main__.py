@@ -1,17 +1,12 @@
 import asyncio
 
 from ragbot import ragbot
-from ragbot.config import RagbotConfig
 from ragbot.container import RagbotContainer
 
 
 def bootstrap_app() -> None:
-    # Initialize the DI container:
-    container = RagbotContainer()
-
-    # Load the configuration:
-    config = RagbotConfig()
-    container.config.from_pydantic(config)
+    # Initialize the DI container and load the configuration:
+    container = RagbotContainer.from_default_config()
 
     logger = container.logger_factory().get_logger("ragbot_setup")
     logger.info("Bootsrapping Ragbot...")

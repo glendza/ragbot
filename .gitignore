@@ -24,3 +24,6 @@ wheels/
 # Environment data
 .env*
 !.env.example
+
+# Milvus local DB:
+*.db

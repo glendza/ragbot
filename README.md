@@ -104,3 +104,31 @@ uv lock --upgrade-package package-name
    ```
    https://discord.com/oauth2/authorize?client_id=<APPLICATION ID>&scope=bot&permissions=563484677372992
    ```
+
+## CLI
+
+For installing completions:
+
+```sh
+typer ragbot.cli --install-completion
+```
+
+To generate CLI docs:
+
+```sh
+typer ragbot.cli utils docs --name "ragbot" --output docs/ragbot_cli.md --title "Ragbot CLI"
+```
+
+Full (generated) CLI docs can be found [here](./docs/ragbot_cli.md).
+
+## Vector DB
+
+[Milvus Lite](https://milvus.io/docs/milvus_lite.md) was chosen for the vector DB.
+
+To init the Milvus DB:
+
+1. Set `RAGBOT__MILVUS__URI` env variable to a local file, e.g. `./milvus.db`;
+2. Run:
+   ```sh
+   ragbot-cli milvus init
+   ```
