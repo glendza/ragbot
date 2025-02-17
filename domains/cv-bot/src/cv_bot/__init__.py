@@ -1,6 +1,11 @@
 from pathlib import Path
 
+from .conversational_schema import CONVERSATIONAL_SCHEMA
 from .models import WorkExperience
+
+
+def get_conversational_schema() -> str:
+    return CONVERSATIONAL_SCHEMA
 
 
 def get_knowledge_base() -> list[str]:

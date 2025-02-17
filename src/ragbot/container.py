@@ -56,6 +56,10 @@ class RagbotContainer(containers.DeclarativeContainer):
     ai_chat_service: providers.Factory[AiChatService] = providers.Factory(
         OpenAIChatService,
         openai_client=openai,
+        conversational_schema=providers.Callable(
+            lambda d: d.get_conversational_schema(),
+            d=domain,
+        ),
     )
 
     milvus_client: providers.Singleton[AsyncMilvusClient] = providers.Singleton(
