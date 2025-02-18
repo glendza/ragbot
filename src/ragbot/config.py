@@ -40,6 +40,9 @@ class RagbotConfig(BaseSettings):
     # Domain:
     domain_module_path: str
 
+    # RAG:
+    rag_retrieval_limit: int = Field(default=5)
+
     # Discord:
     discord: DiscordConfig
 

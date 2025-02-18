@@ -23,5 +23,26 @@
         "import-data",
       ],
     },
-  ]
+    {
+      "name": "Search Milvus",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "ragbot.cli.__init__",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+        "milvus",
+        "search",
+        "${input:enterSearchQuery}",
+      ],
+    },
+  ],
+  "inputs": [
+    {
+      "id": "enterSearchQuery",
+      "type": "promptString",
+      "description": "Enter search query",
+    },
+  ],
 }

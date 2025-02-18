@@ -3,6 +3,7 @@ from .chat_client_service import ChatMessage, ChatService
 from .domain_provider import DomainProvider
 from .embedding_service import EmbeddingService
 from .logging_service import LoggerFactoryService
+from .rag_query_engine import RagQueryEngine
 
 __all__ = [
     "AiChatService",
@@ -11,4 +12,5 @@ __all__ = [
     "DomainProvider",
     "EmbeddingService",
     "ChatMessage",
+    "RagQueryEngine",
 ]

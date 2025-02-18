@@ -179,3 +179,17 @@ def import_data() -> None:
     )
 
     console.print("Data imported successfully.")
+
+
+@cli.command(
+    name="search",
+    help="Semantic search in the Milvus vector database.",
+)
+def search(query: str) -> None:
+    async def _search() -> None:
+        app_container = RagbotContainer.from_default_config()
+        rag_query_service = app_container.rag_query_engine()
+        results = await rag_query_service.process_query(query)
+        console.print(f"Search results for query '{query}':\n\n{results.model_dump_json(indent=2)}")
+
+    asyncio.run(_search())

@@ -2,6 +2,7 @@ from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
 from ragbot.interfaces import AiChatService
+from ragbot.models.dtos import RagSearchResults
 
 
 class OpenAIChatService(AiChatService):
@@ -13,24 +14,46 @@ class OpenAIChatService(AiChatService):
         self._openai_client = openai_client
         self._conversational_schema = conversational_schema
 
-    async def process_message(self, message: str) -> str:
-        # Prepare the message for the OpenAI API:
-        messages: list[ChatCompletionMessageParam] = [
+    async def process_message(self, *, message: str, retrieved_context: RagSearchResults) -> str:
+        # Conversational schema:
+        conversational_schema: ChatCompletionMessageParam | None = (
             {
-                "role": "user",
-                "content": message,
-            },
-        ]
+                "role": "system",
+                "content": self._conversational_schema,
+            }
+            if self._conversational_schema
+            else None
+        )
 
-        # Prepend the conversational schema to the messages, if provided:
-        if self._conversational_schema:
-            messages.insert(
-                0,
-                {
-                    "role": "system",
-                    "content": self._conversational_schema,
-                },
-            )
+        # Retrieved knowledge:
+        retrieved_knowledge_entries = "\n".join(
+            f'{i + 1}. "{r.content}" (score: {r.distance:.4f})' for i, r in enumerate(retrieved_context.root)
+        )
+        retrieved_knowledge: ChatCompletionMessageParam | None = (
+            {
+                "role": "system",
+                "content": f"Retrieved knowledge:\n{retrieved_knowledge_entries}",
+            }
+            if retrieved_context.root
+            else None
+        )
+
+        # User message:
+        user_message: ChatCompletionMessageParam = {
+            "role": "user",
+            "content": message,
+        }
+
+        messages: list[ChatCompletionMessageParam] = [
+            m
+            for m in [
+                # NOTE: The order of these messages is important!
+                conversational_schema,
+                retrieved_knowledge,
+                user_message,
+            ]
+            if m
+        ]
 
         # Send the message to the OpenAI API:
         response = await self._openai_client.chat.completions.create(
@@ -41,6 +64,6 @@ class OpenAIChatService(AiChatService):
 
         # Extract the response from the API response:
         if not response.choices or not response.choices[0].message.content:
-            return "I'm sorry, I don't understand."  # TODO: parameterize this
+            return "I'm sorry, I don't understand."
 
         return response.choices[0].message.content

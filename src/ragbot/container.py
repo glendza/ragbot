@@ -6,8 +6,14 @@ from openai import AsyncClient
 from pymilvus import AsyncMilvusClient
 
 from ragbot.config import RagbotConfig
-from ragbot.interfaces import AiChatService, ChatService, DomainProvider, LoggerFactoryService
-from ragbot.services import LoggerFactory, OpenAIChatService, OpenAIEmbeddingService, RagbotDiscordChat
+from ragbot.interfaces import AiChatService, ChatService, DomainProvider, LoggerFactoryService, RagQueryEngine
+from ragbot.services import (
+    LoggerFactory,
+    MilvusRagQueryEngine,
+    OpenAIChatService,
+    OpenAIEmbeddingService,
+    RagbotDiscordChat,
+)
 
 
 def init_domain(module_path: str) -> DomainProvider:
@@ -71,4 +77,16 @@ class RagbotContainer(containers.DeclarativeContainer):
         OpenAIEmbeddingService,
         openai_client=openai,
         embedding_model=config.openai.embedding_model,
+    )
+
+    rag_query_engine: providers.Factory[RagQueryEngine] = providers.Factory(
+        MilvusRagQueryEngine,
+        collection_name=config.milvus.collection_name,
+        max_results=config.rag_retrieval_limit,
+        logger=providers.Factory(
+            lambda lf: lf.get_logger("rag_query_engine"),
+            lf=logger_factory,
+        ),
+        milvus_client=milvus_client,
+        embedding_service=embedding_service,
     )
