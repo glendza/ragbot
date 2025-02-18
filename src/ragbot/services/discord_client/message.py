@@ -26,6 +26,10 @@ class DiscordMessage(ChatMessage):
     def message_text(self) -> str:
         return self._message.content
 
+    @property
+    def thread_id(self) -> str:
+        return str(self._thread.id)
+
     async def reply(self, message: str) -> None:
         async with self._lock:
             if self._has_replied:

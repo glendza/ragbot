@@ -4,15 +4,24 @@ import typing
 from dependency_injector import containers, providers
 from openai import AsyncClient
 from pymilvus import AsyncMilvusClient
+from tinydb import TinyDB
 
 from ragbot.config import RagbotConfig
-from ragbot.interfaces import AiChatService, ChatService, DomainProvider, LoggerFactoryService, RagQueryEngine
+from ragbot.interfaces import (
+    AiChatService,
+    ChatService,
+    ContextStorageService,
+    DomainProvider,
+    LoggerFactoryService,
+    RagQueryEngine,
+)
 from ragbot.services import (
     LoggerFactory,
     MilvusRagQueryEngine,
     OpenAIChatService,
     OpenAIEmbeddingService,
     RagbotDiscordChat,
+    TinydbContextStorage,
 )
 
 
@@ -89,4 +98,19 @@ class RagbotContainer(containers.DeclarativeContainer):
         ),
         milvus_client=milvus_client,
         embedding_service=embedding_service,
+    )
+
+    tinydb = providers.Singleton(  # Singleton because of the concurrency issues with TinyDB
+        TinyDB,
+        path=config.tinydb.db_path,
+    )
+
+    context_storage: providers.Factory[ContextStorageService] = providers.Factory(
+        TinydbContextStorage,
+        db=tinydb,
+        table_name=config.tinydb.table_name,
+        logger=providers.Factory(
+            lambda lf: lf.get_logger("tinydb_context_storage"),
+            lf=logger_factory,
+        ),
     )

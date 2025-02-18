@@ -17,6 +17,7 @@ $ ragbot [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `milvus`: Manage Milvus DB and its collections.
+* `tinydb`: Manage TinyDB database and its tables.
 
 ## `ragbot milvus`
 
@@ -37,6 +38,7 @@ $ ragbot milvus [OPTIONS] COMMAND [ARGS]...
 * `init`: Initialize the Milvus vector database with...
 * `drop-collection`: Drop a collection from the Milvus vector...
 * `import-data`: Import data into the Milvus vector database.
+* `search`: Semantic search in the Milvus vector...
 
 ### `ragbot milvus init`
 
@@ -74,6 +76,56 @@ Import data into the Milvus vector database.
 
 ```console
 $ ragbot milvus import-data [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `ragbot milvus search`
+
+Semantic search in the Milvus vector database.
+
+**Usage**:
+
+```console
+$ ragbot milvus search [OPTIONS] QUERY
+```
+
+**Arguments**:
+
+* `QUERY`: [required]
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## `ragbot tinydb`
+
+Manage TinyDB database and its tables.
+
+**Usage**:
+
+```console
+$ ragbot tinydb [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `truncate-table`: Truncate a table in the TinyDB database.
+
+### `ragbot tinydb truncate-table`
+
+Truncate a table in the TinyDB database.
+
+**Usage**:
+
+```console
+$ ragbot tinydb truncate-table [OPTIONS]
 ```
 
 **Options**:

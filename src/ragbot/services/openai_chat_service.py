@@ -3,6 +3,7 @@ from openai.types.chat import ChatCompletionMessageParam
 
 from ragbot.interfaces import AiChatService
 from ragbot.models.dtos import RagSearchResults
+from ragbot.models.structured_outputs import ChatResponse
 
 
 class OpenAIChatService(AiChatService):
@@ -14,7 +15,13 @@ class OpenAIChatService(AiChatService):
         self._openai_client = openai_client
         self._conversational_schema = conversational_schema
 
-    async def process_message(self, *, message: str, retrieved_context: RagSearchResults) -> str:
+    async def process_message(
+        self,
+        *,
+        message: str,
+        retrieved_context: RagSearchResults,
+        summarized_chat_history: str | None,
+    ) -> ChatResponse:
         # Conversational schema:
         conversational_schema: ChatCompletionMessageParam | None = (
             {
@@ -32,9 +39,19 @@ class OpenAIChatService(AiChatService):
         retrieved_knowledge: ChatCompletionMessageParam | None = (
             {
                 "role": "system",
-                "content": f"Retrieved knowledge:\n{retrieved_knowledge_entries}",
+                "content": f"Retrieved knowledge:\n\n{retrieved_knowledge_entries}",
             }
             if retrieved_context.root
+            else None
+        )
+
+        # Chat history context:
+        history_context: ChatCompletionMessageParam | None = (
+            {
+                "role": "system",
+                "content": f"Here is the summarized chat history for reference:\n\n{summarized_chat_history}",
+            }
+            if summarized_chat_history
             else None
         )
 
@@ -50,20 +67,25 @@ class OpenAIChatService(AiChatService):
                 # NOTE: The order of these messages is important!
                 conversational_schema,
                 retrieved_knowledge,
+                history_context,
                 user_message,
             ]
             if m
         ]
 
         # Send the message to the OpenAI API:
-        response = await self._openai_client.chat.completions.create(
+        response = await self._openai_client.beta.chat.completions.parse(
             model="gpt-4o-mini",
             messages=messages,
             store=False,
+            response_format=ChatResponse,
         )
 
         # Extract the response from the API response:
         if not response.choices or not response.choices[0].message.content:
-            return "I'm sorry, I don't understand."
+            return ChatResponse(
+                message="I'm sorry, I don't have a response for that.",
+                summarized_context=summarized_chat_history,  # Nothing to update
+            )
 
-        return response.choices[0].message.content
+        return ChatResponse.model_validate_json(response.choices[0].message.content)

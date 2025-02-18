@@ -6,6 +6,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from ragbot.types.logging import LogLevel
 
 
+class TinydbContextStorageConfig(BaseSettings):
+    db_path: str
+    table_name: str
+
+
 class DiscordConfig(BaseSettings):
     token: str | None = None
 
@@ -42,6 +47,9 @@ class RagbotConfig(BaseSettings):
 
     # RAG:
     rag_retrieval_limit: int = Field(default=5)
+
+    # Context storage:
+    tinydb: TinydbContextStorageConfig
 
     # Discord:
     discord: DiscordConfig

@@ -8,6 +8,11 @@ class ChatMessage(ABC):
     def message_text(self) -> str:
         pass
 
+    @property
+    @abstractmethod
+    def thread_id(self) -> str:
+        pass
+
     @abstractmethod
     def reply(self, message: str) -> typing.Awaitable[None]:
         pass
