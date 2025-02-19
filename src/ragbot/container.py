@@ -2,13 +2,12 @@ import importlib
 import typing
 
 from dependency_injector import containers, providers
-from openai import AsyncClient
 from pymilvus import AsyncMilvusClient
 from tinydb import TinyDB
 
 from ragbot.config import RagbotConfig
 from ragbot.interfaces import (
-    AiChatService,
+    AIChatService,
     ChatService,
     ContextStorageService,
     DomainProvider,
@@ -18,11 +17,13 @@ from ragbot.interfaces import (
 from ragbot.services import (
     LoggerFactory,
     MilvusRagQueryEngine,
-    OpenAIChatService,
     OpenAIEmbeddingService,
     RagbotDiscordChat,
     TinydbContextStorage,
 )
+
+if typing.TYPE_CHECKING:
+    from openai import AsyncClient
 
 
 def init_domain(module_path: str) -> DomainProvider:
@@ -42,8 +43,51 @@ class RagbotContainer(containers.DeclarativeContainer):
         """
         Create a new container instance with the default configuration.
         """
+        config = RagbotConfig()
         c = cls()
-        c.config.from_pydantic(RagbotConfig())
+
+        # Providing backend for AI Chat Service
+        if config.ai_chat_backend == "openai":
+            c.ai_chat_service.override(
+                providers.Factory(
+                    provides="ragbot.backends.ai_chat_providers.openai_chat_service.OpenAIChatService",
+                    logger=providers.Factory(
+                        lambda lf: lf.get_logger("openai_chat_service"),
+                        lf=c.logger_factory,
+                    ),
+                    openai_client=c.openai_async_client,
+                    model=config.openai.model,
+                    temperature=config.openai.temperature,
+                    max_tokens=config.openai.max_tokens,
+                    conversational_schema=providers.Callable(
+                        provides=lambda d: d.get_conversational_schema(),
+                        d=c.domain,
+                    ),
+                )
+            )
+        elif config.ai_chat_backend == "mistralai":
+            c.ai_chat_service.override(
+                providers.Factory(
+                    provides="ragbot.backends.ai_chat_providers.mistralai_chat_service.MistralAIChatService",
+                    logger=providers.Factory(
+                        lambda lf: lf.get_logger("mistralai_chat_service"),
+                        lf=c.logger_factory,
+                    ),
+                    mistralai_client=providers.Singleton(
+                        "mistralai.Mistral",
+                        api_key=config.mistralai.api_key,
+                    ),
+                    model=config.mistralai.model,
+                    temperature=config.mistralai.temperature,
+                    max_tokens=config.mistralai.max_tokens,
+                    conversational_schema=providers.Callable(
+                        provides=lambda d: d.get_conversational_schema(),
+                        d=c.domain,
+                    ),
+                )
+            )
+
+        c.config.from_pydantic(config)
         return c
 
     config = providers.Configuration()
@@ -63,19 +107,12 @@ class RagbotContainer(containers.DeclarativeContainer):
         token=config.discord.token,
     )
 
-    openai: providers.Factory[AsyncClient] = providers.Factory(
-        AsyncClient,
+    openai_async_client: providers.Singleton["AsyncClient"] = providers.Singleton(
+        "openai.AsyncClient",
         api_key=config.openai.api_key,
     )
 
-    ai_chat_service: providers.Factory[AiChatService] = providers.Factory(
-        OpenAIChatService,
-        openai_client=openai,
-        conversational_schema=providers.Callable(
-            lambda d: d.get_conversational_schema(),
-            d=domain,
-        ),
-    )
+    ai_chat_service: providers.Factory[AIChatService] = providers.AbstractFactory()
 
     milvus_client: providers.Singleton[AsyncMilvusClient] = providers.Singleton(
         AsyncMilvusClient,
@@ -84,7 +121,7 @@ class RagbotContainer(containers.DeclarativeContainer):
 
     embedding_service: providers.Factory[OpenAIEmbeddingService] = providers.Factory(
         OpenAIEmbeddingService,
-        openai_client=openai,
+        openai_client=openai_async_client,
         embedding_model=config.openai.embedding_model,
     )
 

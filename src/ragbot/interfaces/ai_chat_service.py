@@ -5,7 +5,7 @@ from ragbot.models.dtos import RagSearchResults
 from ragbot.models.structured_outputs import ChatResponse
 
 
-class AiChatService(ABC):
+class AIChatService(ABC):
     @abstractmethod
     def process_message(
         self,

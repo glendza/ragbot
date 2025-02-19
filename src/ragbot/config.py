@@ -1,6 +1,6 @@
 import typing
 
-from pydantic import Field
+from pydantic import Field, ValidationError, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from ragbot.types.logging import LogLevel
@@ -17,9 +17,24 @@ class DiscordConfig(BaseSettings):
 
 class OpenAIConfig(BaseSettings):
     api_key: str | None = None
+    model: str = "gpt-4o-mini"
     embedding_model: (
-        typing.Literal["text-embedding-ada-002", "text-embedding-3-small", "text-embedding-3-large"] | None
+        typing.Literal[
+            "text-embedding-ada-002",
+            "text-embedding-3-small",
+            "text-embedding-3-large",
+        ]
+        | None
     ) = None
+    temperature: float = 0.5
+    max_tokens: int = 2500
+
+
+class MistralAIConfig(BaseSettings):
+    model: str = "mistral-small-latest"
+    api_key: str | None = None
+    temperature: float = 0.5
+    max_tokens: int = 2500
 
 
 class MilvusConfig(BaseSettings):
@@ -54,8 +69,32 @@ class RagbotConfig(BaseSettings):
     # Discord:
     discord: DiscordConfig
 
+    # AI chat backend:
+    ai_chat_backend: typing.Literal["openai", "mistralai"]
+
     # OpenAI:
     openai: OpenAIConfig
 
+    # MistralAI:
+    mistralai: MistralAIConfig
+
     # Milvus:
     milvus: MilvusConfig
+
+    @model_validator(mode="after")
+    def validate_ai_chat_backend_configured(self) -> "RagbotConfig":
+        if self.ai_chat_backend == "openai":
+            if not self.openai.api_key:
+                raise ValidationError('openai.api_key must be present if ai_chat_backend is "openai"')
+            if not self.openai.model:
+                raise ValidationError('openai.model must be present if ai_chat_backend is "openai"')
+        return self
+
+    @model_validator(mode="after")
+    def validate_ai_chat_backend_configured_mistralai(self) -> "RagbotConfig":
+        if self.ai_chat_backend == "mistralai":
+            if not self.mistralai.api_key:
+                raise ValidationError('mistralai.api_key must be present if ai_chat_backend is "mistralai"')
+            if not self.mistralai.model:
+                raise ValidationError('mistralai.model must be present if ai_chat_backend is "mistralai"')
+        return self

@@ -1,18 +1,28 @@
+from logging import Logger
+
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
-from ragbot.interfaces import AiChatService
+from ragbot.interfaces import AIChatService
 from ragbot.models.dtos import RagSearchResults
 from ragbot.models.structured_outputs import ChatResponse
 
 
-class OpenAIChatService(AiChatService):
+class OpenAIChatService(AIChatService):
     def __init__(
         self,
+        logger: Logger,
         openai_client: AsyncOpenAI,
+        model: str,
+        temperature: float,
+        max_tokens: int,
         conversational_schema: str | None = None,
     ) -> None:
+        self._logger = logger
         self._openai_client = openai_client
+        self._model = model
+        self._temperature = temperature
+        self._max_tokens = max_tokens
         self._conversational_schema = conversational_schema
 
     async def process_message(
@@ -75,11 +85,21 @@ class OpenAIChatService(AiChatService):
 
         # Send the message to the OpenAI API:
         response = await self._openai_client.beta.chat.completions.parse(
-            model="gpt-4o-mini",
+            model=self._model,
+            temperature=self._temperature,
+            max_tokens=self._max_tokens,
             messages=messages,
             store=False,
             response_format=ChatResponse,
         )
+
+        if response.usage:
+            self._logger.info(
+                "Spent %d tokens for replying to chat message (%d prompt + %d completion tokens)",
+                response.usage.total_tokens,
+                response.usage.prompt_tokens,
+                response.usage.completion_tokens,
+            )
 
         # Extract the response from the API response:
         if not response.choices or not response.choices[0].message.content:

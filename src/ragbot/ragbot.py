@@ -3,7 +3,7 @@ import asyncio
 from dependency_injector.wiring import Provide, inject
 
 from ragbot.container import RagbotContainer
-from ragbot.interfaces import AiChatService, ChatService, ContextStorageService, LoggerFactoryService, RagQueryEngine
+from ragbot.interfaces import AIChatService, ChatService, ContextStorageService, LoggerFactoryService, RagQueryEngine
 
 
 @inject
@@ -11,7 +11,7 @@ async def run(
     *,
     logger_factory: LoggerFactoryService = Provide[RagbotContainer.logger_factory],
     chat_service: ChatService = Provide[RagbotContainer.chat_service],
-    ai_chat_service: AiChatService = Provide[RagbotContainer.ai_chat_service],
+    ai_chat_service: AIChatService = Provide[RagbotContainer.ai_chat_service],
     rag_query_service: RagQueryEngine = Provide[RagbotContainer.rag_query_engine],
     context_storage_service: ContextStorageService = Provide[RagbotContainer.context_storage],
 ) -> None:
