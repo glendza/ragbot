@@ -37,6 +37,11 @@ class MistralAIConfig(BaseSettings):
     max_tokens: int = 2500
 
 
+class JinaConfig(BaseSettings):
+    api_key: str | None = None
+    api_endpoint: str = "https://api.jina.ai/v1/embeddings"
+
+
 class MilvusConfig(BaseSettings):
     uri: str | None = None
     collection_name: str | None = None
@@ -72,11 +77,17 @@ class RagbotConfig(BaseSettings):
     # AI chat backend:
     ai_chat_backend: typing.Literal["openai", "mistralai"]
 
+    # Embeddings backend:
+    embeddings_backend: typing.Literal["openai", "jina"]
+
     # OpenAI:
     openai: OpenAIConfig
 
     # MistralAI:
     mistralai: MistralAIConfig
+
+    # Jina:
+    jina: JinaConfig
 
     # Milvus:
     milvus: MilvusConfig
@@ -85,16 +96,32 @@ class RagbotConfig(BaseSettings):
     def validate_ai_chat_backend_configured(self) -> "RagbotConfig":
         if self.ai_chat_backend == "openai":
             if not self.openai.api_key:
-                raise ValidationError('openai.api_key must be present if ai_chat_backend is "openai"')
+                raise ValidationError('"openai.api_key" must be present if "ai_chat_backend" is "openai"')
             if not self.openai.model:
-                raise ValidationError('openai.model must be present if ai_chat_backend is "openai"')
+                raise ValidationError('"openai.model" must be present if "ai_chat_backend" is "openai"')
         return self
 
     @model_validator(mode="after")
     def validate_ai_chat_backend_configured_mistralai(self) -> "RagbotConfig":
         if self.ai_chat_backend == "mistralai":
             if not self.mistralai.api_key:
-                raise ValidationError('mistralai.api_key must be present if ai_chat_backend is "mistralai"')
+                raise ValidationError('"mistralai.api_key" must be present if "ai_chat_backend" is "mistralai"')
             if not self.mistralai.model:
-                raise ValidationError('mistralai.model must be present if ai_chat_backend is "mistralai"')
+                raise ValidationError('m"istralai.model" must be present if "ai_chat_backend" is "mistralai"')
+        return self
+
+    @model_validator(mode="after")
+    def validate_openai_embeddings_configured(self) -> "RagbotConfig":
+        if self.embeddings_backend == "openai":
+            if not self.openai.api_key:
+                raise ValidationError('"openai.api_key" must be present if "embeddings_backend" is "openai"')
+            if not self.openai.embedding_model:
+                raise ValidationError('"openai.embedding_model" must be present if "embeddings_backend" is "openai"')
+        return self
+
+    @model_validator(mode="after")
+    def validate_jina_configured(self) -> "RagbotConfig":
+        if self.embeddings_backend == "jina":
+            if not self.jina.api_key:
+                raise ValidationError('"jina.api_key" must be present')
         return self

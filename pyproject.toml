@@ -35,6 +35,10 @@ mistralai = [
     "mistralai>=1.5.0, <2.0.0",
 ]
 
+jina = [
+    "aiohttp>=3.11.12, <4.0.0",
+]
+
 
 [build-system]
 requires = ["hatchling"]

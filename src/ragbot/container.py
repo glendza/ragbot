@@ -11,16 +11,11 @@ from ragbot.interfaces import (
     ChatService,
     ContextStorageService,
     DomainProvider,
+    EmbeddingService,
     LoggerFactoryService,
     RagQueryEngine,
 )
-from ragbot.services import (
-    LoggerFactory,
-    MilvusRagQueryEngine,
-    OpenAIEmbeddingService,
-    RagbotDiscordChat,
-    TinydbContextStorage,
-)
+from ragbot.services import LoggerFactory, MilvusRagQueryEngine, RagbotDiscordChat, TinydbContextStorage
 
 if typing.TYPE_CHECKING:
     from openai import AsyncClient
@@ -87,6 +82,31 @@ class RagbotContainer(containers.DeclarativeContainer):
                 )
             )
 
+        if config.embeddings_backend == "jina":
+            c.embedding_service.override(
+                providers.Factory(
+                    provides="ragbot.backends.embedding_providers.jina_embedding_service.JinaEmbeddingService",
+                    logger=providers.Factory(
+                        lambda lf: lf.get_logger("jina_embedding_service"),
+                        lf=c.logger_factory,
+                    ),
+                    api_key=config.jina.api_key,
+                    api_endpoint=config.jina.api_endpoint,
+                )
+            )
+        elif config.embeddings_backend == "openai":
+            c.embedding_service.override(
+                providers.Factory(
+                    provides="ragbot.backends.embedding_providers.openai_embedding_service.OpenAIEmbeddingService",
+                    logger=providers.Factory(
+                        lambda lf: lf.get_logger("openai_embedding_service"),
+                        lf=c.logger_factory,
+                    ),
+                    openai_client=c.openai_async_client,
+                    embedding_model=config.openai.embedding_model,
+                )
+            )
+
         c.config.from_pydantic(config)
         return c
 
@@ -119,11 +139,7 @@ class RagbotContainer(containers.DeclarativeContainer):
         uri=config.milvus.uri,
     )
 
-    embedding_service: providers.Factory[OpenAIEmbeddingService] = providers.Factory(
-        OpenAIEmbeddingService,
-        openai_client=openai_async_client,
-        embedding_model=config.openai.embedding_model,
-    )
+    embedding_service: providers.Factory[EmbeddingService] = providers.AbstractFactory()
 
     rag_query_engine: providers.Factory[RagQueryEngine] = providers.Factory(
         MilvusRagQueryEngine,
