@@ -15,7 +15,7 @@ from ragbot.interfaces import (
     LoggerFactoryService,
     RagQueryEngine,
 )
-from ragbot.services import LoggerFactory, MilvusRagQueryEngine, RagbotDiscordChat, TinydbContextStorage
+from ragbot.services import LoggerFactory, MilvusRagQueryEngine, TinydbContextStorage
 
 if typing.TYPE_CHECKING:
     from openai import AsyncClient
@@ -41,8 +41,35 @@ class RagbotContainer(containers.DeclarativeContainer):
         config = RagbotConfig()
         c = cls()
 
-        # Providing backend for AI Chat Service
-        if config.ai_chat_backend == "openai":
+        # Providing backend for Chat Service:
+        if config.chat_backend == "discord" and config.discord:
+            c.chat_service.override(
+                providers.Singleton(
+                    "ragbot.backends.chat_clients.discord_client.RagbotDiscordChat",
+                    logger=providers.Singleton(
+                        lambda lf: lf.get_logger("discord_chat"),
+                        lf=c.logger_factory,
+                    ),
+                    token=config.discord.token,
+                )
+            )
+        elif config.chat_backend == "irc" and config.irc:
+            c.chat_service.override(
+                providers.Singleton(
+                    "ragbot.backends.chat_clients.irc_client.RagbotIRCChat",
+                    logger=providers.Singleton(
+                        lambda lf: lf.get_logger("irc_chat"),
+                        lf=c.logger_factory,
+                    ),
+                    host=config.irc.host,
+                    port=config.irc.port,
+                    nickname=config.irc.nickname,
+                    channels=config.irc.channels,
+                )
+            )
+
+        # Providing backend for AI Chat Service:
+        if config.ai_chat_backend == "openai" and config.openai:
             c.ai_chat_service.override(
                 providers.Factory(
                     provides="ragbot.backends.ai_chat_providers.openai_chat_service.OpenAIChatService",
@@ -60,7 +87,7 @@ class RagbotContainer(containers.DeclarativeContainer):
                     ),
                 )
             )
-        elif config.ai_chat_backend == "mistralai":
+        elif config.ai_chat_backend == "mistralai" and config.mistralai:
             c.ai_chat_service.override(
                 providers.Factory(
                     provides="ragbot.backends.ai_chat_providers.mistralai_chat_service.MistralAIChatService",
@@ -82,7 +109,8 @@ class RagbotContainer(containers.DeclarativeContainer):
                 )
             )
 
-        if config.embeddings_backend == "jina":
+        # Providing backend for Embedding Service:
+        if config.embeddings_backend == "jina" and config.jina:
             c.embedding_service.override(
                 providers.Factory(
                     provides="ragbot.backends.embedding_providers.jina_embedding_service.JinaEmbeddingService",
@@ -94,7 +122,7 @@ class RagbotContainer(containers.DeclarativeContainer):
                     api_endpoint=config.jina.api_endpoint,
                 )
             )
-        elif config.embeddings_backend == "openai":
+        elif config.embeddings_backend == "openai" and config.openai:
             c.embedding_service.override(
                 providers.Factory(
                     provides="ragbot.backends.embedding_providers.openai_embedding_service.OpenAIEmbeddingService",
@@ -122,17 +150,14 @@ class RagbotContainer(containers.DeclarativeContainer):
         module_path=config.domain_module_path,
     )
 
-    chat_service: providers.Singleton[ChatService] = providers.Singleton(
-        RagbotDiscordChat,
-        token=config.discord.token,
-    )
+    chat_service: providers.AbstractSingleton[ChatService] = providers.AbstractSingleton()
 
     openai_async_client: providers.Singleton["AsyncClient"] = providers.Singleton(
         "openai.AsyncClient",
         api_key=config.openai.api_key,
     )
 
-    ai_chat_service: providers.Factory[AIChatService] = providers.AbstractFactory()
+    ai_chat_service: providers.AbstractFactory[AIChatService] = providers.AbstractFactory()
 
     milvus_client: providers.Singleton[AsyncMilvusClient] = providers.Singleton(
         AsyncMilvusClient,
