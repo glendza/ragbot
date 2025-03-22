@@ -49,6 +49,10 @@ class JinaConfig(BaseSettings):
     api_endpoint: str = "https://api.jina.ai/v1/embeddings"
 
 
+class SentenceEmbedderConfig(BaseSettings):
+    model: str = "sentence-transformers/all-MiniLM-L6-v2"
+
+
 class MilvusConfig(BaseSettings):
     uri: str | None = None
     collection_name: str | None = None
@@ -85,7 +89,7 @@ class RagbotConfig(BaseSettings):
     ai_chat_backend: typing.Literal["openai", "mistralai"]
 
     # Embeddings backend:
-    embeddings_backend: typing.Literal["openai", "jina"]
+    embeddings_backend: typing.Literal["openai", "jina", "sentence"]
 
     # Discord:
     discord: DiscordConfig | None = None
@@ -101,6 +105,8 @@ class RagbotConfig(BaseSettings):
 
     # Jina:
     jina: JinaConfig | None = None
+
+    sentence_embedder: SentenceEmbedderConfig | None = None
 
     # Milvus:
     milvus: MilvusConfig
@@ -136,6 +142,8 @@ class RagbotConfig(BaseSettings):
             raise ValidationError('"jina" must be present if "embeddings_backend" is "jina"')
         if self.embeddings_backend == "openai" and not self.openai:
             raise ValidationError('"openai" must be present if "embeddings_backend" is "openai"')
+        if self.embeddings_backend == "sentence" and not self.sentence_embedder:
+            raise ValidationError('"sentence" must be present if "embeddings_backend" is "sentence"')
         return self
 
     @model_validator(mode="before")
@@ -161,5 +169,8 @@ class RagbotConfig(BaseSettings):
 
         elif embeddings_backend == "openai":
             values["jina"] = None
+
+        if embeddings_backend != "sentence":
+            values["sentence_embedder"] = None
 
         return values

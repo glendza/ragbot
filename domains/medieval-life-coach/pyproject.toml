@@ -1,0 +1,18 @@
+[project]
+name = "medieval-life-coach"
+version = "0.1.0"
+description = "RAG domain for a medieval life coach"
+readme = "README.md"
+authors = [
+    { name = "glendza", email = "milos.991@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-text-splitters>=0.3.6,<0.4.0",
+    "langchain-community>=0.3.18",
+    "pypdf>=5.3.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -37,6 +37,15 @@
         "${input:enterSearchQuery}",
       ],
     },
+    {
+      "name": "Debug Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "envFile": "${workspaceFolder}/.env"
+    }
   ],
   "inputs": [
     {

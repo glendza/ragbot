@@ -1,7 +1,7 @@
 [project]
 name = "cv-bot"
 version = "0.1.0"
-description = "Add your description here"
+description = "RAG domain for talking about Milos' professional experience"
 readme = "README.md"
 authors = [
     { name = "glendza", email = "milos.991@gmail.com" }
@@ -10,9 +10,6 @@ requires-python = ">=3.12"
 dependencies = [
     "pydantic>=2.10.6, <3.0.0",
 ]
-
-[project.scripts]
-cv-bot = "cv_bot:main"
 
 [build-system]
 requires = ["hatchling"]

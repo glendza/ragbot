@@ -134,6 +134,13 @@ class RagbotContainer(containers.DeclarativeContainer):
                     embedding_model=config.openai.embedding_model,
                 )
             )
+        elif config.embeddings_backend == "sentence" and config.sentence_embedder:
+            c.embedding_service.override(
+                providers.Factory(
+                    provides="ragbot.backends.embedding_providers.sentence_embedding_service.SentenceEmbedderService",
+                    embedding_model=config.sentence_embedder.model,
+                )
+            )
 
         c.config.from_pydantic(config)
         return c
